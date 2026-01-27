@@ -1,0 +1,37 @@
+name: Run SonarQube with Gradle
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  sonarqube:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 必需：获取完整 Git 历史用于 SonarCloud 分析
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: gradle  # 启用 Gradle 缓存
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Run Gradle build and SonarCloud analysis
+        run: |
+          ./gradlew build sonar \
+            -Dsonar.projectKey=my-spring-boot-app \
+            -Dsonar.organization=starhq \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.token=$SONAR_TOKEN
+        env:
+          SONARCLOUD_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GIT_HUB_TOKEN }}  # 用于 PR 装饰器
