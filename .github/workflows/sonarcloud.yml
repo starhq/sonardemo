@@ -28,7 +28,7 @@ jobs:
       - name: Run Gradle build and SonarCloud analysis
         run: |
           ./gradlew build sonar \
-            -Dsonar.projectKey=sonardemo \
+            -Dsonar.projectKey=starhq_sonardemo \
             -Dsonar.organization=starhq \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.token=$SONAR_TOKEN
