@@ -5,29 +5,67 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: sonarqube-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
   sonarqube:
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
+      
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0  # 必需：获取完整 Git 历史用于 SonarCloud 分析
 
       - name: Set up JDK 25
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '25'
           distribution: 'temurin'
-          cache: gradle  # 启用 Gradle 缓存
+          
+      - name: Cache SonarQube packages
+        uses: actions/cache@v5
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Cache Gradle/Maven dependencies
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ~/.m2/repository
+          key: ${{ runner.os }}-${{ hashFiles('**/build.gradle', '**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-maven
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      - name: Run Gradle build and SonarCloud analysis
+      - name: Build and analyze with Gradle
+        if: contains(github.event.repository.name, 'gradle') || fileExists('build.gradle')
         run: |
-          ./gradlew build sonar
+          ./gradlew build jacocoTestReport sonar
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GIT_HUB_TOKEN: ${{ secrets.GIT_HUB_TOKEN }}  # 用于 PR 装饰器
+
+      - name: Build and analyze with Maven
+        if: contains(github.event.repository.name, 'maven') || fileExists('pom.xml')
+        run: |
+          mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GIT_HUB_TOKEN: ${{ secrets.GIT_HUB_TOKEN }}  # 用于 PR 装饰器
