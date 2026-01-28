@@ -52,6 +52,7 @@ test {
 
 sonar {
     properties {
+		
         property "sonar.projectName", "sonardemo"
         property "sonar.projectDescription", "study how to use sonar cloud"
         property "sonar.sources", "src/main/java"
