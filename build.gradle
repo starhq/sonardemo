@@ -52,13 +52,17 @@ test {
 
 sonar {
     properties {
-		
+
         property "sonar.projectName", "sonardemo"
         property "sonar.projectDescription", "study how to use sonar cloud"
         property "sonar.sources", "src/main/java"
         property "sonar.tests", "src/test/java"
         property "sonar.java.binaries", "build/classes/java/main"
-        property "sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml"
+        property "sonar.coverage.jacoco.xmlReportPaths", layout.buildDirectory.dir("reports/jacoco/test/jacocoTestReport.xml").get().asFile
 		property "sonar.java.source", "25" 
+		property "sonar.projectKey", "starhq_sonardemo"
+		property "sonar.organization", "starhq"
+		property "sonar.host.url", "https://sonarcloud.io"
+		property "sonar.token", System.getenv("SONAR_TOKEN")
     }
 }
