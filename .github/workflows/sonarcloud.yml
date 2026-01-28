@@ -55,7 +55,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build and analyze with Gradle
-        if: contains(github.event.repository.name, 'gradle') || fileExists('build.gradle')
+        if: contains(github.event.repository.name, 'gradle')
         run: |
           ./gradlew build jacocoTestReport sonar
         env:
@@ -63,7 +63,7 @@ jobs:
           GIT_HUB_TOKEN: ${{ secrets.GIT_HUB_TOKEN }}  # 用于 PR 装饰器
 
       - name: Build and analyze with Maven
-        if: contains(github.event.repository.name, 'maven') || fileExists('pom.xml')
+        if: contains(github.event.repository.name, 'maven')
         run: |
           mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
         env:
