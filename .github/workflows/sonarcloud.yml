@@ -27,7 +27,7 @@ jobs:
 
       - name: Run Gradle build and SonarCloud analysis
         run: |
-          ./gradlew sonar
+          ./gradlew build sonar
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GIT_HUB_TOKEN: ${{ secrets.GIT_HUB_TOKEN }}  # 用于 PR 装饰器
